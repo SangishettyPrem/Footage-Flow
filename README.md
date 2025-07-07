@@ -21,7 +21,7 @@ Footage Flow is a full-stack web application that transforms user-uploaded video
 | Area        | Technology                             |
 |-------------|-----------------------------------------|
 | Frontend    | React 18, Vite, TypeScript              |
-| Styling     | Tailwind CSS, shadcn/ui                 |
+| Styling     | Tailwind CSS                            |
 | Backend     | Node.js, Express.js                     |
 | Database    | MySQL (via `mysql2`)     |
 | AI Services | Google Gemini API, AssemblyAI (optional)|
