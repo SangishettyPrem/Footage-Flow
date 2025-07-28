@@ -95,12 +95,12 @@ The repository is structured as a monorepo with the following key directories:
     -   Start the Backend Server:
         ```bash
         # From the Backend directory
-        npm start
+        npm run dev
         ```
     -   Start the Frontend Development Server:
         ```bash
         # From the Frontend directory
-        npm start
+        npm run dev
         ```
     -   Start the Python OCR Service:
         ```bash
