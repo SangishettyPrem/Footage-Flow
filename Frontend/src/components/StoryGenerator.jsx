@@ -4,12 +4,17 @@ import { Card } from "./ui/card"
 import { Textarea } from "./ui/textarea"
 import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
-import { Sparkles, Zap, Eye, Mic, Film, FileVideo, ChevronDown, ChevronUp, Image, Upload, Check } from "lucide-react"
+import { Sparkles, Zap, Eye, Mic, Film, ChevronDown, ChevronUp, Upload, Check } from "lucide-react"
 import MediaModal from "./ui/MediaModal"
 import { IMAGE_BASE_URL } from "../services/api"
+import { useAuth } from "../contexts/AuthContext"
+import { generateStory } from "../services/storyService"
 
-export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
-  const [prompt, setPrompt] = useState("")
+export function StoryGenerator() {
+  const { Files, setStories } = useAuth();
+  const [errors, seterrors] = useState(null);
+  const [prompt, setPrompt] = useState("");
+  const [isGenerating, setisGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState("")
   const [selectedFile, setSelectedFile] = useState(null);
@@ -34,7 +39,7 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
       ...prev,
       [fileId]: !prev[fileId]
     }));
-  };
+  }
 
   const toggleFileSelection = (file) => {
     if (selectedFile && selectedFile.id === file.id) {
@@ -45,15 +50,15 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
   };
 
   const truncateText = (text, maxLength = 80) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
+    if (text?.length <= maxLength) return text;
+    return text?.substring(0, maxLength) + "...";
   };
 
   const truncateFileName = (name, maxLength = 20) => {
-    if (name.length <= maxLength) return name;
-    const extension = name.split('.').pop();
-    const nameWithoutExt = name.substring(0, name.lastIndexOf('.'));
-    const truncated = nameWithoutExt.substring(0, maxLength - extension.length - 4) + "...";
+    if (name?.length <= maxLength) return name;
+    const extension = name?.split('.').pop();
+    const nameWithoutExt = name?.substring(0, name.lastIndexOf('.'));
+    const truncated = nameWithoutExt?.substring(0, maxLength - extension?.length - 4) + "...";
     return truncated + "." + extension;
   };
 
@@ -64,24 +69,39 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
   ]
 
   const handleGenerate = async () => {
-    if (!prompt.trim() || !selectedFile) return
+    if (!prompt.trim() || !selectedFile) return;
 
-    setGenerationProgress(0)
+    setisGenerating(true);
+    setGenerationProgress(0);
+    setCurrentStep("analyzing");
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 5;
+      setGenerationProgress(progress);
+      if (progress >= 30) setCurrentStep("processing");
+      if (progress >= 70) setCurrentStep("creating");
+      if (progress >= 100) {
+        clearInterval(interval);
+      }
+    }, 3000); // adjust speed as needed
 
     try {
-      onStoryGenerated?.(selectedFile)
-      // Reset form
-      setPrompt("")
-      setSelectedFile(null)
-
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      const response = await generateStory(selectedFile, prompt);
+      clearInterval(interval);
+      setGenerationProgress(100);
+      setStories((prev) => [response?.story, ...prev]);
     } catch (error) {
-      console.error("Error generating story:", error);
-      // Handle error appropriately
+      console.error("Failed to Generate Story:", error);
+      seterrors("Error generating story");
+      clearInterval(interval);
     } finally {
-      setGenerationProgress(0)
-      setCurrentStep("")
+      setisGenerating(false);
+      setCurrentStep("");
     }
-  }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -103,7 +123,7 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
           <div className="flex items-center space-x-2">
             <Check className="w-4 h-4 text-blue-600" />
             <span className="text-sm font-medium text-blue-900">
-              {selectedFile.name} selected for story generation
+              {selectedFile.title} selected for story generation
             </span>
           </div>
         </div>
@@ -112,7 +132,7 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
       {/* File Grid */}
       <div className="w-full min-h-auto bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {files.length > 0 ? (
+          {Files?.length > 0 ? (
             <div className="space-y-6">
               {/* Header */}
               <div className="text-center sm:text-left">
@@ -120,13 +140,13 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
                   Your Files
                 </h2>
                 <p className="text-gray-600 text-sm sm:text-base">
-                  {files.length} file{files.length !== 1 ? 's' : ''} uploaded • Click to select files for story generation
+                  {Files?.length} file{Files?.length !== 1 ? 's' : ''} uploaded • Click to select Files for story generation
                 </p>
               </div>
 
               {/* Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {files.map((file) => {
+                {Files.map((file) => {
                   const isSelected = selectedFile && selectedFile.id === file.id;
                   return (
                     <Card
@@ -155,31 +175,20 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
                           {/* Thumbnail */}
                           <div className="relative">
                             <img
-                              src={file.type === "image" ? `${IMAGE_BASE_URL}${file.thumbnail}` || "/videoPlayer.png" : "/videoPlayer.png"}
+                              src={file.file_type === "image" ? `${IMAGE_BASE_URL}${file.thumbnail_path}` || "/videoPlayer.png" : "/videoPlayer.png"}
                               alt={file.name}
                               className={`w-full h-32 sm:h-40 object-contain rounded-lg hover:opacity-90 transition-opacity ${isSelected ? 'ring-2 ring-blue-500' : ''
                                 }`}
                               onClick={(e) => handleThumbnailClick(file, e)}
                             />
-                            {/* Type Badge Overlay */}
-                            <div className="absolute top-1 right-1">
-                              <Badge variant={file.type === "video" ? "default" : "secondary"} className="text-xs">
-                                {file.type === "video" ? (
-                                  <FileVideo className="w-3 h-3 mr-1" />
-                                ) : (
-                                  <Image className="w-3 h-3 mr-1" />
-                                )}
-                                {file.type}
-                              </Badge>
-                            </div>
                           </div>
 
                           {/* File Name */}
                           <div>
                             <h3 className={`font-semibold text-sm sm:text-base leading-tight ${isSelected ? 'text-blue-900' : 'text-gray-900'
-                              }`} title={file.name}>
-                              <span className="sm:hidden">{truncateFileName(file.name, 15)}</span>
-                              <span className="hidden sm:inline">{truncateFileName(file.name, 25)}</span>
+                              }`} title={file.title}>
+                              <span className="sm:hidden">{truncateFileName(file.title?.split(".")[0], 15)}</span>
+                              <span className="hidden sm:inline">{truncateFileName(file.title?.split(".")[0], 25)}</span>
                             </h3>
                           </div>
 
@@ -230,7 +239,7 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                    No files uploaded yet
+                    No Files uploaded yet
                   </h2>
                   <p className="text-gray-500 text-sm sm:text-base max-w-md">
                     Upload your videos and images to get started with organizing and analyzing your content!
@@ -241,7 +250,6 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
           )}
         </div>
       </div>
-
       {/* Generate Button */}
       <Button
         onClick={handleGenerate}
@@ -257,11 +265,18 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
           <>
             <Sparkles className="w-5 h-5 mr-2 text-white" />
             <span className="text-white">
-              Generate Story {selectedFile ? `(${selectedFile.name})` : ''}
+              Generate Story {selectedFile ? `(${selectedFile.title})` : ''}
             </span>
           </>
         )}
       </Button>
+
+      {/* Error Message */}
+      {(errors && isGenerating) && (
+        <div className="w-full bg-red-100 border border-red-300 text-red-700 rounded p-3 text-center mb-4">
+          {errors}
+        </div>
+      )}
 
       {/* Generation Progress */}
       {isGenerating && (
@@ -300,7 +315,7 @@ export function StoryGenerator({ isGenerating, files, onStoryGenerated }) {
               <div className="flex flex-wrap gap-2">
                 {selectedFile && (
                   <Badge variant="outline" className="text-xs">
-                    {selectedFile.name}
+                    {selectedFile.title}
                   </Badge>
                 )}
               </div>

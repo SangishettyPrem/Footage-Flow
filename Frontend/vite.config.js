@@ -7,6 +7,7 @@ export default defineConfig({
     react(),
   ],
   server: {
+    historyApiFallback: true,
     hmr: {
       overlay: false
     }

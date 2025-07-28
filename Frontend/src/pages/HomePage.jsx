@@ -23,7 +23,7 @@ const HomePage = () => {
         {
             icon: Search,
             title: "Intelligent Search",
-            description: "Find specific moments using keywords, actions, locations, and more",
+            description: "Find specific moments using keywords, actions and more",
         },
         {
             icon: Sparkles,
@@ -175,7 +175,7 @@ const HomePage = () => {
                             </div>
                             <h3 className="text-xl font-semibold mb-3">Search & Discover</h3>
                             <p className="text-gray-600">
-                                Find specific moments using natural language. Search by people, places, actions, or emotions.
+                                Find specific moments using natural language. Search by actions, or emotions.
                             </p>
                         </div>
 

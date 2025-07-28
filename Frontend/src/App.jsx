@@ -2,8 +2,12 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider, useAuth } from "./contexts/AuthContext"
 import HomePage from "./pages/HomePage"
 import Dashboard from "./pages/Dashboard"
-import AuthPage from "./pages/AuthPage"
 import "./App.css"
+import PageNotFound from "./components/PageNotFound"
+import { GoogleOAuthProvider } from "@react-oauth/google"
+import { googleOAuthConfig } from "./config/config"
+import SetPasswordPage from "./pages/SetPasswordPage"
+import LoginForm from "./pages/LoginForm"
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
@@ -35,6 +39,14 @@ function PublicRoute({ children }) {
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : children
 }
 
+const GoogleAuthProvider = ({ children }) => {
+  return (
+    <GoogleOAuthProvider clientId={googleOAuthConfig.clientId}>
+      {children}
+    </GoogleOAuthProvider>
+  )
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -43,10 +55,13 @@ function AppRoutes() {
         path="/auth"
         element={
           <PublicRoute>
-            <AuthPage />
+            <GoogleAuthProvider>
+              <LoginForm />
+            </GoogleAuthProvider>
           </PublicRoute>
         }
       />
+      <Route path="/set-password" element={<SetPasswordPage />} />
       <Route
         path="/dashboard"
         element={
@@ -56,7 +71,7 @@ function AppRoutes() {
         }
       />
       {/* Use replace for catch-all route as well */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   )
 }

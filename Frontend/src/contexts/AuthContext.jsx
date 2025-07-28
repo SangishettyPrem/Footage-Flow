@@ -1,7 +1,8 @@
-"use client"
-
 import { createContext, useContext, useState, useEffect } from "react"
-import apiService from "../services/api"
+import { getProfile } from "../services/authService"
+import { useLocation, useNavigate } from "react-router-dom"
+import { getFiles } from "../services/fileService"
+import { getStories } from "../services/storyService"
 
 const AuthContext = createContext()
 
@@ -14,69 +15,64 @@ export const useAuth = () => {
 }
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [user, setUser] = useState(null);
+    const [Token, setToken] = useState('');
+    const [Files, setFiles] = useState(null);
+    const [Stories, setStories] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
-        checkAuthStatus()
-    }, [])
+        checkAuthStatus();
+        setToken(localStorage.getItem('authToken'));
+    }, [location])
 
     const checkAuthStatus = async () => {
         try {
             const token = localStorage.getItem("authToken")
             if (token) {
-                const userData = await apiService.getProfile()
+                const userData = await getProfile()
                 setUser(userData)
             }
         } catch (error) {
             console.error("Auth check failed:", error)
-            localStorage.removeItem("authToken")
+            if (error?.response?.data?.message == "Invalid token. User not found.") navigate('/');
+            else if (error?.response?.data?.message == "Access denied. No token provided.") navigate("/")
         } finally {
             setLoading(false)
         }
     }
 
-    const login = async (credentials) => {
-        try {
-            setError(null)
-            const response = await apiService.login(credentials);
-            localStorage.setItem("authToken", response?.token)
-            setUser(response?.user)
-            return response
-        } catch (error) {
-            setError(error.message)
-            throw error
+    const fetchFiles = async () => {
+        const response = await getFiles(Token);
+        if (response?.data?.success) {
+            setFiles(response?.data?.files);
         }
     }
 
-
-
-    const register = async (userData) => {
-        try {
-            setError(null)
-            const response = await apiService.register(userData);
-            return response;
-        } catch (error) {
-            setError(error.message)
-            throw error
+    const fetchStories = async () => {
+        const response = await getStories(Token);
+        if (response?.data?.success) {
+            setStories(response?.data?.stories);
+            return response?.data?.stories; 
         }
     }
 
-    const logout = () => {
-        apiService.logout()
-        setUser(null)
-        setError(null)
-    }
 
     const value = {
         user,
-        loading,
-        error,
-        login,
-        register,
-        logout,
         isAuthenticated: !!user,
+        loading,
+        Token,
+
+        Files,
+        setFiles,
+        Stories,
+        setStories,
+
+        fetchFiles,
+        fetchStories
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

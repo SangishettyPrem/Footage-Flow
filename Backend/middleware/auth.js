@@ -1,38 +1,32 @@
 const jwt = require("jsonwebtoken")
-const db = require("../database/db")
+const { envConfig } = require("../config/envConfig")
+const { User } = require("../models")
 
 const authMiddleware = async (req, res, next) => {
     try {
         const token = req.header("Authorization")?.replace("Bearer ", "")
-
         if (!token) {
-            return res.status(401).json({ error: "Access denied. No token provided." })
+            return res.status(401).json({ message: "Access denied. No token provided.", success: false })
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret")
+        const decoded = jwt.verify(token, envConfig.jwtSecretKey || "fallback_secret")
 
-        // Verify user still exists
-        const user = await db.getUserById(decoded.userId)
+        const user = await User.findOne({ where: { id: decoded?.id } })
         if (!user) {
-            return res.status(401).json({ error: "Invalid token. User not found." })
+            return res.status(401).json({ message: "Invalid token. User not found.", success: false })
         }
-
-        req.user = {
-            id: decoded.userId,
-            email: decoded.email,
-        }
-
-        next()
+        req.user = user?.dataValues;
+        next();
     } catch (error) {
         if (error.name === "JsonWebTokenError") {
-            return res.status(401).json({ error: "Invalid token." })
+            return res.status(401).json({ message: "Invalid token.", success: false })
         }
         if (error.name === "TokenExpiredError") {
-            return res.status(401).json({ error: "Token expired." })
+            return res.status(401).json({ message: "Token expired.", success: false })
         }
 
         console.error("Auth middleware error:", error)
-        res.status(500).json({ error: "Internal server error" })
+        res.status(500).json({ message: error?.message || "Internal server error", success: false })
     }
 }
 
