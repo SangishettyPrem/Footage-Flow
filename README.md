@@ -4,123 +4,134 @@ Footage Flow is a full-stack web application that leverages cutting-edge AI to t
 
 ## ✨ Core Features
 
--   **AI-Powered Image-to-Video Generation**: Utilizes the Google Gemini API to generate short videos from a single user-uploaded image.
--   **Automated Image Tagging**: Employs a Hugging Face model to perform Optical Character Recognition (OCR) and analysis, automatically generating relevant labels for images.
--   **Automated Video Transcription**: Integrates with the OpenAI Whisper API to automatically generate transcripts from the audio of the created videos.
--   **Secure User Authentication**: Integrated with Google OAuth 2.0 for a secure and easy login/signup process.
--   **Decoupled Architecture**: The project is organized into three distinct services: a frontend application, a backend API, and a Python-based service for image processing.
+- ✅ **Video Upload** – Upload videos with thumbnails and duration metadata
+- 🧠 **AI Transcription** – Automatically generate transcripts for videos
+- ✨ **AI Story Generator** – Convert transcripts into compelling first-person narratives using Gemini
+- 🏷️ **Smart Tagging** – Auto-generated tags using computer vision for video search
+- 🔍 **Search Functionality** – Find videos by tags or keywords
+- 📚 **Story Library** – View all AI-generated stories in a clean timeline format
+- ⚡ **Responsive UI** – Clean and minimal design using Tailwind CSS
+
+---
 
 ## 🛠️ Tech Stack
 
--   **Frontend**: Modern web application handling user interaction and API communication.
--   **Backend**: Manages user data, authentication, and acts as a bridge to the AI services.
--   **AI & Machine Learning**:
-    -   **Google Gemini API**: For the core image-to-video generation.
-    -   **Hugging Face Transformers**: For the image labeling/OCR service.
-    -   **OpenAI Whisper API**: For video transcription.
--   **Authentication**: Google OAuth 2.0
+| Area        | Technology                             |
+|-------------|-----------------------------------------|
+| Frontend    | React 18, Vite, TypeScript              |
+| Styling     | Tailwind CSS                            |
+| Backend     | Node.js, Express.js                     |
+| Database    | MySQL (via `mysql2`)     |
+| AI Services | Google Gemini API, AssemblyAI (optional)|
+| Auth        | JWT-based Authentication                |
+| File Upload | Multer (Node), Cloud/Local File Storage |
 
-## 📂 Project Structure
+---
 
-The repository is structured as a monorepo with the following key directories:
+## 📂 Folder Structure
 
 ```
-.
-├── Backend/         # Contains the backend server logic and API endpoints
-├── Frontend/        # Contains the frontend user interface code
-├── Image OCR(PY)/   # Python service for Hugging Face model integration
+FootageFlow/
+│
+├── client/                    # React frontend
+│   ├── components/            # Reusable UI components
+│   ├── pages/                 # Page-level views (Upload, Search, Story)                
+│   ├── services/              # API calls
+│   └── App.jsx                # Main app
+│
+├── server/                    # Node.js backend
+│   ├── routes/                # API endpoints
+│   ├── controllers/           # Logic handlers
+│   ├── services/              # Transcription/AI services
+│   ├── database/              # DB connection and queries
+│   └── index.js               # Entry point
+│
 └── README.md
 ```
 
-## 🚀 Getting Started
+---
 
-### Prerequisites
+## 🧪 Setup Instructions
 
--   Node.js and npm/yarn
--   Python and pip
--   Git
--   Access keys for Google Cloud (OAuth & Gemini) and Hugging Face.
+### ✅ Prerequisites
+- Node.js ≥ 18.x
+- MySQL Server running
+- Google Gemini API Key
 
-### Installation & Setup
+### ⚙️ Backend Setup
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/SangishettyPrem/Footage-Flow.git
-    cd Footage-Flow
-    ```
+```bash
+cd server
+npm install
+cp .env.example .env  # Add DB + API keys
 
-2.  **Configure Environment Variables:**
+# Run MySQL migrations if needed
+npm start
+```
 
-    Create a `.env` file in the `Backend` directory. This file will store your secret keys and configuration variables. **Do not commit this file to version control.**
+### 💻 Frontend Setup
 
-    **`Backend/.env.example`**
-    ```env
-    # Google OAuth 2.0 Credentials
-    GOOGLE_CLIENT_ID=your_google_client_id
-    GOOGLE_CLIENT_SECRET=your_google_client_secret
+```bash
+cd client
+npm install
+npm run dev
+```
 
-    # Google Gemini API Key
-    GEMINI_API_KEY=your_gemini_api_key
+---
 
-    # Hugging Face (if needed for private models/rate limits)
-    HUGGING_FACE_TOKEN=your_hugging_face_token
+## 🔐 Environment Variables (`.env`)
 
-    # Database Connection String
-    DATABASE_URL=your_database_connection_string
+```
+PORT=5000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=footageflow
+GOOGLE_GEMINI_API_KEY=your_api_key
+JWT_SECRET=your_jwt_secret
+```
 
-    # JWT Secret for session management
-    JWT_SECRET=a_strong_random_secret_key
-    ```
+---
 
-3.  **Install Dependencies:**
+## 🧠 AI Integration
 
-    -   **Backend:**
-        ```bash
-        cd Backend
-        npm install
-        ```
-    -   **Frontend:**
-        ```bash
-        cd ../Frontend
-        npm install
-        ```
-    -   **Image OCR Service:**
-        ```bash
-        cd ../"Image OCR(PY)"
-        pip install -r requirements.txt
-        ```
+Footage Flow uses [Google Gemini API](https://ai.google.dev/) to generate stories from transcripts.
 
-4.  **Run the Application:**
+**Prompt Used:**
 
-    -   Start the Backend Server:
-        ```bash
-        # From the Backend directory
-        npm start
-        ```
-    -   Start the Frontend Development Server:
-        ```bash
-        # From the Frontend directory
-        npm start
-        ```
-    -   Start the Python OCR Service:
-        ```bash
-        # From the "Image OCR(PY)" directory
-        python app.py
-        ```
+```
+You are a storytelling assistant. You turn transcripts into emotional, first-person narratives.
+Here is the transcript:
+"[transcript_text]"
+```
 
-## 📝 Usage
+---
 
-1.  Navigate to the application in your browser.
-2.  Click "Login" and authenticate using your Google account.
-3.  On the main dashboard, upload an image you want to animate.
-4.  The application will automatically display suggested labels for your image.
-5.  Confirm or edit the labels and click "Generate Video".
-6.  The backend will process the request with the Gemini API.
-7.  Once complete, the generated video will be available for viewing and download.
-8.  The application will also display an automatically generated transcript of the video's audio.
 
-## 🔒 Security Note
+## 📈 Future Improvements
 
-The commit history shows that sensitive files like `.env` and credentials have been removed. It is critical to **never** commit secret keys or credentials to the repository. Ensure that your `.gitignore` file is properly configured to exclude these files and any local configuration folders.
+- 🎙️ Voice-to-text support with AssemblyAI
+- 🎞️ Storyboard generator with scene highlights
+- 🧠 Multi-language support
+- ✍️ Story editing by users post-generation
 
-The `Backend/credentials` folder should be added to your `.gitignore` file to prevent accidental commits.
+---
+
+## 🤝 Contributing
+
+Pull requests and feature ideas are welcome!  
+If you find bugs or want to enhance something, feel free to open an issue.
+
+---
+
+## 📄 License
+
+MIT License.  
+© 2025 Prem Kumar.
+
+---
+
+## 🙌 Acknowledgements
+
+- [Google Gemini API](https://ai.google.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
