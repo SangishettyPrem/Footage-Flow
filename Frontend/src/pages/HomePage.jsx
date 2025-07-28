@@ -73,9 +73,6 @@ const HomePage = () => {
 
             {/* Hero Section */}
             <section className="container mx-auto px-4 py-20 text-center">
-                <Badge variant="secondary" className="mb-6 bg-purple-100 text-purple-700 border-purple-200">
-                    🚀 Startupathon Challenge by Persist Ventures
-                </Badge>
 
                 <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
                     Transform Your Footage Into Compelling Stories
@@ -213,7 +210,6 @@ const HomePage = () => {
             {/* Footer */}
             <footer className="!border-t-gray-800 bg-white/80 backdrop-blur-sm">
                 <div className="container mx-auto px-4 py-8 text-center text-gray-600">
-                    <p>Built for Persist Ventures Startupathon Challenge</p>
                     <p className="text-sm mt-2">Revolutionizing video storytelling with AI</p>
                 </div>
             </footer>

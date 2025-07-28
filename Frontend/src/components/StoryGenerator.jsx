@@ -91,10 +91,10 @@ export function StoryGenerator() {
       const response = await generateStory(selectedFile, prompt);
       clearInterval(interval);
       setGenerationProgress(100);
-      setStories((prev) => [response?.story, ...prev]);
+      setStories((prev) => [response?.data?.story, ...prev]);
     } catch (error) {
       console.error("Failed to Generate Story:", error);
-      seterrors("Error generating story");
+      seterrors(error?.message || "Failed to Generate Story");
       clearInterval(interval);
     } finally {
       setisGenerating(false);
