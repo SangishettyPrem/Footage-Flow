@@ -6,7 +6,7 @@ Footage Flow is a full-stack web application that leverages cutting-edge AI to t
 
 -   **AI-Powered Image-to-Video Generation**: Utilizes the Google Gemini API to generate short videos from a single user-uploaded image.
 -   **Automated Image Tagging**: Employs a Hugging Face model to perform Optical Character Recognition (OCR) and analysis, automatically generating relevant labels for images.
--   **Automated Video Transcription**: Integrates with the OpenAI Whisper API to automatically generate transcripts from the audio of the created videos.
+-   **Automated Video Transcription**: Integrates with the Assembly AI API to automatically generate transcripts from the audio of the created videos.
 -   **Secure User Authentication**: Integrated with Google OAuth 2.0 for a secure and easy login/signup process.
 -   **Decoupled Architecture**: The project is organized into three distinct services: a frontend application, a backend API, and a Python-based service for image processing.
 
@@ -17,7 +17,7 @@ Footage Flow is a full-stack web application that leverages cutting-edge AI to t
 -   **AI & Machine Learning**:
     -   **Google Gemini API**: For the core image-to-video generation.
     -   **Hugging Face Transformers**: For the image labeling/OCR service.
-    -   **OpenAI Whisper API**: For video transcription.
+    -   **Assembly AI API**: For video transcription.
 -   **Authentication**: Google OAuth 2.0
 
 ## 📂 Project Structure
